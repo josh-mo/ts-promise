@@ -1,4 +1,4 @@
-import { isFunction } from './util';
+import { isFunction, isPromise } from './util';
 
 const pending = Symbol('pending');
 const fulfilled = Symbol('fulfilled');
@@ -27,13 +27,9 @@ class TsPromise {
 
         if (this.resolveList.length > 0) {
           this.resolveList.forEach((refolveFunction) => {
-            console.log('refolveFunction is', refolveFunction);
-
             refolveFunction();
           });
         }
-
-        console.log('class resolve! ', value);
       }
     };
 
@@ -54,33 +50,51 @@ class TsPromise {
       }
     };
 
-    executor(this.resolve, this.reject);
+    try {
+      executor(this.resolve, this.reject);
+      this.state = pending;
+    } catch (err) {
+      this.reject(err);
+      throw new Error('error');
+    }
   }
 
   then(onFulfilled: Resolve, onRejected: Reject) {
-    console.log('then is invoked');
+    return new TsPromise((resolve, reject) => {
+      let result: any;
 
-    if (this.state === pending) {
-      console.log('in the pending ');
+      if (this.state === pending) {
+        this.resolveList.push(() => {
+          result = onFulfilled(this.value);
+          if (isFunction(result)) {
+            setTimeout(() => resolve(result.value));
+          } else {
+            resolve(result);
+          }
+        });
 
-      this.resolveList.push(() => {
-        onFulfilled(this.value);
-      });
+        this.rejectList.push(() => {
+          result = onRejected(this.reason);
+          if (isFunction(result)) {
+            setTimeout(() => reject(result.value));
+          } else {
+            reject(result);
+          }
+        });
+      }
 
-      this.rejectList.push(() => {
-        onRejected(this.reason);
-      });
-    }
+      if (this.state === fulfilled) {
+        console.log('in the fulfilled');
+        result = onFulfilled(this.value);
+        resolve(result);
+      }
 
-    if (this.state === fulfilled) {
-      console.log('in the fulfilled');
-      onFulfilled(this.value);
-    }
-
-    if (this.state === rejected) {
-      console.log('in the reject');
-      onRejected(this.reason);
-    }
+      if (this.state === rejected) {
+        console.log('in the reject');
+        result = onRejected(this.reason);
+        reject(reject);
+      }
+    });
   }
 }
 
