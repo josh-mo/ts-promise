@@ -15,13 +15,24 @@ class TsPromise {
   reject!: Reject;
   state: State = pending;
   value: any;
-  resaon: any;
+  reason: any;
+  resolveList: (() => void)[] = [];
+  rejectList: (() => void)[] = [];
 
   constructor(executor: Exector) {
     this.resolve = (value: any) => {
       if (this.state === pending) {
         this.state = fulfilled;
         this.value = value;
+
+        if (this.resolveList.length > 0) {
+          this.resolveList.forEach((refolveFunction) => {
+            console.log('refolveFunction is', refolveFunction);
+
+            refolveFunction();
+          });
+        }
+
         console.log('class resolve! ', value);
       }
     };
@@ -29,6 +40,16 @@ class TsPromise {
     this.reject = (value: any) => {
       if (this.state === pending) {
         this.state = rejected;
+        this.reason = value;
+
+        if (this.resolveList.length > 0) {
+          this.rejectList.forEach((rejectFunction) => {
+            console.log('rejectFunction is', rejectFunction);
+
+            rejectFunction();
+          });
+        }
+
         console.log('class reject! ', value);
       }
     };
@@ -39,12 +60,26 @@ class TsPromise {
   then(onFulfilled: Resolve, onRejected: Reject) {
     console.log('then is invoked');
 
+    if (this.state === pending) {
+      console.log('in the pending ');
+
+      this.resolveList.push(() => {
+        onFulfilled(this.value);
+      });
+
+      this.rejectList.push(() => {
+        onRejected(this.reason);
+      });
+    }
+
     if (this.state === fulfilled) {
+      console.log('in the fulfilled');
       onFulfilled(this.value);
     }
 
     if (this.state === rejected) {
-      onRejected(this.resaon);
+      console.log('in the reject');
+      onRejected(this.reason);
     }
   }
 }
