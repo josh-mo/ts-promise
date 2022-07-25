@@ -15,11 +15,13 @@ class TsPromise {
   reject!: Reject;
   state: State = pending;
   value: any;
+  resaon: any;
 
   constructor(executor: Exector) {
     this.resolve = (value: any) => {
       if (this.state === pending) {
         this.state = fulfilled;
+        this.value = value;
         console.log('class resolve! ', value);
       }
     };
@@ -34,7 +36,17 @@ class TsPromise {
     executor(this.resolve, this.reject);
   }
 
-  then(onFulfilled: Resolve, onRejected: Reject) {}
+  then(onFulfilled: Resolve, onRejected: Reject) {
+    console.log('then is invoked');
+
+    if (this.state === fulfilled) {
+      onFulfilled(this.value);
+    }
+
+    if (this.state === rejected) {
+      onRejected(this.resaon);
+    }
+  }
 }
 
 TsPromise.deferred = function () {

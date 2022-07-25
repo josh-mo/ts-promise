@@ -1,13 +1,13 @@
 const p = new Promise((resolve, reject) => {
   console.log('promise');
 
-  setTimeout(() => resolve('done'), 2000);
+  setTimeout(() => resolve('done'), 1000);
 });
 
 const p2 = new Promise((resolve, reject) => {
   console.log('promise 2');
 
-  setTimeout(() => resolve('promise 2'), 4000);
+  setTimeout(() => resolve('promise 2'), 1000);
 });
 
 p.then(
