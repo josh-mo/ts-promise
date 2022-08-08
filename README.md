@@ -10,5 +10,6 @@ Test library is [promises-spec](https://github.com/promises-aplus/promises-spec)
 
 ### How to run 
 ```
+yarn
 yarn test
 ```
