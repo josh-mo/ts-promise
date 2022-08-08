@@ -1,18 +1,27 @@
-const p = new Promise((resolve, reject) => {
-  console.log('promise');
+const enrollment = {
+  subject: 'js',
+};
 
-  setTimeout(() => resolve('done'), 1000);
+const studnet = {
+  name: 'peter',
+  grade: 'A',
+};
+
+const simulateRequest = (fn: Function) => {
+  setTimeout(fn, 2000);
+};
+
+const p = new Promise((resolve, reject) => {
+  simulateRequest(() => resolve(studnet));
 });
 
 const p2 = new Promise((resolve, reject) => {
-  console.log('promise 2');
-
-  setTimeout(() => resolve('promise 2'), 1000);
+  simulateRequest(() => resolve(enrollment));
 });
 
 p.then(
   (data) => {
-    console.log('success 1', data);
+    console.log('get student promise resolved', data);
     return p2;
   },
   (data) => {
@@ -21,13 +30,20 @@ p.then(
 )
   .then(
     (data) => {
-      console.log('success 2', data);
-      return p;
+      console.log('get enrollment promise resolved', data);
+      return 'ok2';
     },
-    () => {
-      console.log('reject 2');
+    (data) => {
+      console.log('client reject 2', data);
     }
   )
-  .then(() => {
-    console.log('end of promise');
-  });
+  .then(
+    (data) => {
+      console.log('from client 2', data);
+      return 'ok 3';
+    },
+    (data) => {
+      console.log('client reject 3', data);
+      return 'client 3 reject';
+    }
+  );

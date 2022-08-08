@@ -1,34 +1,44 @@
 import TsPromise from '../TsPromise';
 
-const p = new TsPromise((resolve, reject) => {
-  // resolve('resolve');
-  setTimeout(() => resolve('client done for waiting'), 2000);
+const enrollment = {
+  subject: 'js',
+};
 
-  // setTimeout(() => reject('client done for waiting'), 1000);
+const student = {
+  name: 'peter',
+  grade: 'A',
+};
+
+const simulateRequest = (fn: Function) => {
+  setTimeout(fn, 2000);
+};
+
+const p = new TsPromise((resolve, reject) => {
+  simulateRequest(() => resolve(student));
 });
 
 const p2 = new TsPromise((resolve, reject) => {
-  setTimeout(() => resolve('promise 2'), 5000);
+  simulateRequest(() => resolve(enrollment));
 });
 
 p.then(
   (data) => {
-    console.log('from p', data);
+    console.log('get student promise resolved', data);
     return p2;
   },
   (data) => {
-    console.log('client reject 1', data);
+    console.log('reject 1', data);
     return 'client 1 reject';
   }
 )
   .then(
     (data) => {
-      console.log('from client 1', data);
-      return 'ok 2';
+      console.log('get enrollment promise resolved', data);
+      return 'ok2';
     },
     (data) => {
       console.log('client reject 2', data);
-      return 'cleint 2 reject';
+      return 'client 2 reject';
     }
   )
   .then(
@@ -38,6 +48,6 @@ p.then(
     },
     (data) => {
       console.log('client reject 3', data);
-      return 'cleint 3 reject';
+      return 'client 3 reject';
     }
   );
